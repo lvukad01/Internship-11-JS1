@@ -10,7 +10,7 @@ body {
     border-radius: 10px; 
     width: 300px; 
 }
-  .display { 
+.display { 
     width: 100%; 
     height: 50px; 
     text-align: right; 
@@ -19,4 +19,33 @@ body {
     padding: 5px; 
     border: 1px solid #ae1892; 
     border-radius: 5px; 
+}
+ .buttons { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 5px; 
+}
+  button { 
+    padding: 15px; 
+    font-size: 18px; 
+    cursor: pointer; 
+    border-radius: 5px; 
+}
+  button:disabled { 
+    background: #eee; 
+    cursor: not-allowed; 
+}
+.history-panel { 
+    border-top: 1px solid #aaa; 
+    margin-top: 10px; 
+    display: none; 
+    max-height: 150px; 
+    overflow-y: auto; 
+}
+.history-item { 
+    border-bottom: 1px solid #ddd; 
+    padding: 5px; 
+}
+.shift-active { 
+    background: #f0ad4e; 
 }
