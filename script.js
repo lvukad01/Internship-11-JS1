@@ -25,3 +25,69 @@ function renderButtons() {
     buttonsDiv.appendChild(btn);
   });
 }
+
+function handleKey(key) {
+  const display = document.getElementById('display');
+  
+  if(key.type === 'number') {
+    currentInput += key.label;
+    display.value = currentInput;
+  } 
+  else if(key.type === 'operation') {
+    if(firstValue === null) {
+      firstValue = parseFloat(currentInput);
+      currentInput = '';
+      currentOp = shift && key.shiftFunc ? key.shiftFunc : key.func;
+      display.value = '';
+    }
+  } 
+  else if(key.label === '=') {
+    if(currentOp && firstValue !== null) {
+      let secondValue = parseFloat(currentInput);
+      let result;
+      try {
+        result = currentOp.length === 1 ? currentOp(firstValue) : currentOp(firstValue, secondValue);
+      } catch(e) {
+        result = 'Error';
+      }
+      display.value = result;
+      history.push({input1: firstValue, input2: secondValue, operation: currentOp.name || key.label, result, time: new Date()});
+      firstValue = null;
+      currentInput = '';
+      currentOp = null;
+    }
+  }
+}
+
+document.getElementById('shiftBtn').addEventListener('click', () => {
+  shift = !shift;
+  renderButtons();
+  document.getElementById('shiftBtn').classList.toggle('shift-active', shift);
+});
+
+document.getElementById('historyToggle').addEventListener('click', () => {
+  const panel = document.getElementById('historyPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  renderHistory();
+});
+
+function renderHistory() {
+  const panel = document.getElementById('historyPanel');
+  panel.innerHTML = '';
+  history.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.textContent = `${item.input1} ${item.operation} ${item.input2} = ${item.result}`;
+    panel.appendChild(div);
+  });
+}
+
+document.getElementById('onOffBtn').addEventListener('click', () => {
+  on = !on;
+  renderButtons();
+  document.getElementById('display').value = '';
+  if(!on) history = [];
+  document.getElementById('historyPanel').style.display = 'none';
+});
+
+renderButtons();
