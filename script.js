@@ -102,7 +102,6 @@ const display = document.getElementById('display');
 const buttonsDiv = document.getElementById('buttons');
 const historyPanel = document.getElementById('historyPanel');
 
-/* ---------- TIPKE ---------- */
 
 function renderButtons() {
   buttonsDiv.innerHTML = '';
@@ -116,7 +115,6 @@ function renderButtons() {
   });
 }
 
-/* ---------- LOGIKA KALKULATORA ---------- */
 
 function handleKey(key) {
   if (!on) return;
@@ -174,7 +172,6 @@ function handleKey(key) {
   }
 }
 
-/* ---------- SHIFT ---------- */
 
 document.getElementById('shiftBtn').addEventListener('click', () => {
   shift = !shift;
@@ -182,7 +179,6 @@ document.getElementById('shiftBtn').addEventListener('click', () => {
   document.getElementById('shiftBtn').classList.toggle('shift-active', shift);
 });
 
-/* ---------- POVIJEST I FILTRI ---------- */
 
 const textFilter = document.createElement('input');
 textFilter.placeholder = 'Filtriraj po nazivu operacije...';
