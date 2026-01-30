@@ -75,6 +75,21 @@ const keys = [
   }
 ];
 
+
+const operationNames = {
+  '+': 'zbrajanje',
+  '−': 'oduzimanje',
+  '×': 'mnozenje',
+  '÷': 'dijeljenje',
+  '!': 'faktorijel',
+  'x²': 'kvadrat',
+  'x³': 'kub',
+  'log': 'logaritam',
+  '√': 'korijen',
+  '∛': 'kubni korijen'
+};
+
+
 let shift = false;
 let on = true;
 let currentInput = '';
@@ -86,6 +101,8 @@ let history = [];
 const display = document.getElementById('display');
 const buttonsDiv = document.getElementById('buttons');
 const historyPanel = document.getElementById('historyPanel');
+
+/* ---------- TIPKE ---------- */
 
 function renderButtons() {
   buttonsDiv.innerHTML = '';
@@ -99,19 +116,25 @@ function renderButtons() {
   });
 }
 
+/* ---------- LOGIKA KALKULATORA ---------- */
+
 function handleKey(key) {
   if (!on) return;
 
   if (key.type === 'number') {
+    if (key.label === '.' && currentInput.includes('.')) return;
     currentInput += key.label;
     display.value = currentInput || '0';
     return;
   }
 
   if (key.type === 'operation') {
-    if (currentInput === '' && !shift) return;
+    if (currentInput === '' && firstValue === null) return;
 
-    firstValue = currentInput !== '' ? parseFloat(currentInput) : firstValue;
+    if (currentInput !== '') {
+      firstValue = parseFloat(currentInput);
+    }
+
     currentInput = '';
     currentOp = shift && key.shiftFunc ? key.shiftFunc : key.func;
     currentOpId = shift && key.shiftLabel ? key.shiftLabel : key.label;
@@ -135,6 +158,7 @@ function handleKey(key) {
         a: firstValue,
         b: secondValue,
         operation: currentOpId,
+        opName: operationNames[currentOpId],
         result,
         time: new Date().toLocaleTimeString()
       });
@@ -150,17 +174,66 @@ function handleKey(key) {
   }
 }
 
+/* ---------- SHIFT ---------- */
+
 document.getElementById('shiftBtn').addEventListener('click', () => {
   shift = !shift;
   renderButtons();
   document.getElementById('shiftBtn').classList.toggle('shift-active', shift);
 });
 
+/* ---------- POVIJEST I FILTRI ---------- */
+
+const textFilter = document.createElement('input');
+textFilter.placeholder = 'Filtriraj po nazivu operacije...';
+textFilter.style.display = 'none';
+
+const opFilter = document.createElement('select');
+opFilter.style.display = 'none';
+
+['Sve', '+', '−', '×', '÷', '!', 'x²', 'x³', 'log', '√', '∛'].forEach(op => {
+  const option = document.createElement('option');
+  option.value = op;
+  option.textContent = op;
+  opFilter.appendChild(option);
+});
+
+function applyFilters() {
+  let filtered = [...history];
+
+  if (opFilter.value !== 'Sve') {
+    filtered = filtered.filter(h => h.operation === opFilter.value);
+  }
+
+  const text = textFilter.value.toLowerCase();
+  if (text) {
+    filtered = filtered.filter(h =>
+      h.opName && h.opName.includes(text)
+    );
+  }
+
+  renderHistory(filtered);
+}
+
+textFilter.addEventListener('input', applyFilters);
+opFilter.addEventListener('change', applyFilters);
+
+historyPanel.before(opFilter);
+historyPanel.before(textFilter);
+
 document.getElementById('historyToggle').addEventListener('click', () => {
-  historyPanel.style.display =
-    historyPanel.style.display === 'block' ? 'none' : 'block';
+  const visible = historyPanel.style.display === 'block';
+
+  historyPanel.style.display = visible ? 'none' : 'block';
+  textFilter.style.display = visible ? 'none' : 'block';
+  opFilter.style.display = visible ? 'none' : 'block';
+
+  textFilter.value = '';
+  opFilter.value = 'Sve';
+
   renderHistory(history);
 });
+
 
 function renderHistory(list) {
   historyPanel.innerHTML = '';
@@ -174,33 +247,28 @@ function renderHistory(list) {
     const div = document.createElement('div');
     div.className = 'history-item';
     div.textContent =
-      `${item.a} ${item.operation} ` +
-      `${item.b ?? ''} = ${item.result} (${item.time})`;
+      `${item.a} ${item.operation} ${item.b ?? ''} = ${item.result} (${item.time})`;
     historyPanel.appendChild(div);
   });
 }
 
-const filterInput = document.createElement('input');
-filterInput.placeholder = 'Filtriraj operaciju...';
-filterInput.addEventListener('input', () => {
-  const value = filterInput.value.toLowerCase();
-  const filtered = history.filter(h =>
-    h.operation.toLowerCase().includes(value)
-  );
-  renderHistory(filtered);
-});
-historyPanel.before(filterInput);
 
 document.getElementById('onOffBtn').addEventListener('click', () => {
   on = !on;
+
   display.value = '';
   currentInput = '';
   firstValue = null;
   currentOp = null;
   history = [];
+
   historyPanel.innerHTML = '';
   historyPanel.style.display = 'none';
+  textFilter.style.display = 'none';
+  opFilter.style.display = 'none';
+
   renderButtons();
 });
+
 
 renderButtons();
